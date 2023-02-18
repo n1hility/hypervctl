@@ -7,29 +7,21 @@ import (
 	"reflect"
 
 	"github.com/drtimf/wmi"
-	"github.com/go-ole/go-ole"
 )
 
 type MethodExecutor struct {
 	err      error
+	res      int
 	path     string
 	method   string
 	service  *wmi.Service
 	inParam  *wmi.Instance
 	outParam *wmi.Instance
-	vars     []*ole.VARIANT
 }
 
 func (e *MethodExecutor) Set(name string, value interface{}) *MethodExecutor {
 	if e.err == nil && e.inParam != nil {
 		switch t := value.(type) {
-		case []string:
-			var array ole.VARIANT
-			if array, e.err = CreateStringArrayVariant(t); e.err != nil {
-				return e
-			}
-			e.vars = append(e.vars, &array)
-			value = array
 		case *wmi.Instance:
 			var ref bool
 			if ref, e.err = IsReferenceProperty(e.inParam, name); e.err != nil {
@@ -59,7 +51,11 @@ func (e *MethodExecutor) Get(name string, value interface{}) *MethodExecutor {
 			return e
 		}
 		if _, ok := value.(**wmi.Instance); ok && cimType == wmi.CIM_REFERENCE {
-			result, e.err = e.service.GetObject(result.(string))
+			path, ok := result.(string); 
+			if !ok {
+				return e
+			}
+			result, e.err = e.service.GetObject(path)
 			if e.err != nil {
 				return e
 			}
@@ -85,7 +81,6 @@ func (e *MethodExecutor) cleanupInputs() {
 		e.inParam.Close()
 		e.inParam = nil
 	}
-	e.vars = nil
 }
 
 func (e *MethodExecutor) End() error {

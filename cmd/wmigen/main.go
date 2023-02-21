@@ -9,9 +9,9 @@ import (
 )
 
 func main() {
-	r := regexp.MustCompile(`^\s*([a-zA-Z0-9_]+)\s+(REF)?\s*([a-zA-Z0-9_-]+)(\[\])?\s*([^;:]*);?$`)
+	r := regexp.MustCompile(`^\s*([a-zA-Z0-9_]+)\s+(REF)?\s*([a-zA-Z0-9_-]+)(\[\])?\s*([^;:]*=[^;]*)?;?$`)
 
-    fmt.Println("Paste MWI/CIM model definition and type Ctrl-D")
+	fmt.Println("Paste MWI/CIM model definition and type Ctrl-D")
 
 	var lines []string
 	scanner := bufio.NewScanner(os.Stdin)
@@ -35,7 +35,7 @@ func main() {
 			val = "time.Time"
 		}
 
-		var ref string 
+		var ref string
 		if match[2] == "REF" {
 			val = "string"
 			ref = "REF to " + match[1]
@@ -43,7 +43,7 @@ func main() {
 
 		suffix := match[5]
 		if len(suffix) > 0 || len(ref) > 0 {
-			suffix = " // " + ref + suffix 
+			suffix = " // " + ref + suffix
 		}
 
 		fmt.Printf("\t%s %s%s%s\n", match[3], match[4], val, suffix)

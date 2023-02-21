@@ -11,7 +11,6 @@ import (
 
 type MethodExecutor struct {
 	err      error
-	res      int
 	path     string
 	method   string
 	service  *wmi.Service
@@ -47,11 +46,11 @@ func (e *MethodExecutor) Get(name string, value interface{}) *MethodExecutor {
 		var result interface{}
 		var cimType wmi.CIMTYPE_ENUMERATION
 		result, cimType, _, e.err = e.outParam.Get(name)
-		if e.err != nil {
+		if e.err != nil || result == nil {
 			return e
 		}
 		if _, ok := value.(**wmi.Instance); ok && cimType == wmi.CIM_REFERENCE {
-			path, ok := result.(string); 
+			path, ok := result.(string)
 			if !ok {
 				return e
 			}

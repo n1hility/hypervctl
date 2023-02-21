@@ -10,7 +10,7 @@ import (
 // Variant of Enum.NextObject that also sets object and class paths if present
 func NextObjectWithPath(enum *wmi.Enum, target interface{}) (bool, error) {
 	var err error
-	
+
 	var instance *wmi.Instance
 	if instance, err = enum.Next(); err != nil {
 		return false, err
@@ -24,4 +24,3 @@ func NextObjectWithPath(enum *wmi.Enum, target interface{}) (bool, error) {
 
 	return false, InstanceGetAll(instance, target)
 }
-

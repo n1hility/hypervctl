@@ -110,15 +110,6 @@ func newInstance(classObject *ole.IUnknown) (instance *Instance) {
 	return
 }
 
-func NewInstance(classObject *ole.IUnknown) (instance *Instance) {
-	instance = &Instance{
-		classObject: classObject,
-		classVTable: (*IWbemClassObjectVtbl)(unsafe.Pointer(classObject.RawVTable)),
-	}
-
-	return
-}
-
 // SpawnInstance creates a new instance of a WMI class. The current object must be a class definition obtained
 // from WMI using GetObject or CreateClassEnum.
 func (i *Instance) SpawnInstance() (instance *Instance, err error) {

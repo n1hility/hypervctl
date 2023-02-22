@@ -61,6 +61,10 @@ type VirtualMachine struct {
 	EnhancedSessionModeState                 uint16
 }
 
+func (vm *VirtualMachine) Path() string {
+	return vm.S__PATH
+}
+
 func (vm *VirtualMachine) AddKeyValuePair(key string, value string) error {
 	return vm.kvpOperation("AddKvpItems", key, value, "key already exists?")
 }
@@ -93,7 +97,7 @@ func (vm *VirtualMachine) GetKeyValuePairs() (map[string]string, error) {
 
 	defer service.Close()
 
-	i, err := wmiext.FindFirstRelatedInstance(service, vm.S__PATH, "Msvm_KvpExchangeComponent")
+	i, err := wmiext.FindFirstRelatedInstance(service, vm.Path(), "Msvm_KvpExchangeComponent")
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +144,7 @@ func (vm *VirtualMachine) kvpOperation(op string, key string, value string, ille
 	itemStr := createKvpItem(service, key, value)
 
 	execution := wmiext.BeginInvoke(service, vsms, op).
-		Set("TargetSystem", vm.S__PATH).
+		Set("TargetSystem", vm.Path()).
 		Set("DataItems", []string{itemStr}).
 		Execute()
 

@@ -85,6 +85,10 @@ func DefaultSystemSettings() *SystemSettings {
 
 }
 
+func (s *SystemSettings) Path() string {
+	return s.S__PATH
+}
+
 func (systemSettings *SystemSettings) AddScsiController() (*ScsiControllerSettings, error) {
 	const scsiControllerType = "Microsoft:Hyper-V:Synthetic SCSI Controller"
 	controller := &ScsiControllerSettings{}
@@ -110,7 +114,7 @@ func (systemSettings *SystemSettings) createSystemResourceInternal(settings inte
 		return err
 	}
 
-	path, err := addResource(service, systemSettings.S__PATH, resourceStr)
+	path, err := addResource(service, systemSettings.Path(), resourceStr)
 	if err != nil {
 		return err
 	}
@@ -169,7 +173,7 @@ func (s *SystemSettings) GetVM() (*VirtualMachine, error) {
 	}
 	defer service.Close()
 
-	inst, err := wmiext.FindFirstRelatedInstance(service, s.S__PATH, "Msvm_ComputerSystem")
+	inst, err := wmiext.FindFirstRelatedInstance(service, s.Path(), "Msvm_ComputerSystem")
 	if err != nil {
 		return nil, err
 	}

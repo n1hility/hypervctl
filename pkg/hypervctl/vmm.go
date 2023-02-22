@@ -76,3 +76,47 @@ func (*VirtualMachineManager) GetMachine(name string) (*VirtualMachine, error) {
 
 	return vm, nil
 }
+
+func (*VirtualMachineManager) CreateVhdxFile(path string, maxSize uint64) error {
+	var service *wmi.Service
+	var err error
+	if service, err = wmi.NewLocalService(HyperVNamespace); err != nil {
+		return err
+	}
+	defer service.Close()
+
+	settings := &VirtualHardDiskSettings{}
+	settings.Format = 3
+	settings.MaxInternalSize = maxSize
+	settings.Type = 3
+	settings.Path = path
+
+	instance, err := wmiext.CreateInstance(service, "Msvm_VirtualHardDiskSettingData", settings)
+	if err != nil {
+		return err
+	}
+	defer instance.Close()
+	settingsStr := wmiext.GetCimText(instance)
+
+	imms, err := wmiext.GetSingletonInstance(service, "Msvm_ImageManagementService")
+	if err != nil {
+		return err
+	}
+	defer imms.Close()
+
+	var job *wmi.Instance
+	var ret int32
+	err = wmiext.BeginInvoke(service, imms, "CreateVirtualHardDisk").
+		Set("VirtualDiskSettingData", settingsStr).
+		Execute().
+		Get("Job", &job).
+		Get("ReturnValue", &ret).
+		End()
+
+	if err != nil {
+		return fmt.Errorf("Failed to create vhdx: %w", err)
+	}
+
+	return waitVMResult(ret, service, job)
+}
+

@@ -56,7 +56,7 @@ func (c *ScsiControllerSettings) createSyntheticDriveInternal(slot uint, setting
 		return err
 	}
 
-	path, err := addResource(service, c.systemSettings.S__PATH, driveResource)
+	path, err := addResource(service, c.systemSettings.Path(), driveResource)
 	if err != nil {
 		return err
 	}

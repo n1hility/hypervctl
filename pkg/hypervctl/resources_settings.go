@@ -44,6 +44,10 @@ func (s *ResourceSettings) setAddressOnParent(address string) {
 	s.AddressOnParent = address
 }
 
+func (s *ResourceSettings) Path() string {
+	return s.S__PATH
+}
+
 func createResourceSettingGeneric(settings interface{}, resourceType string) (string, error) {
 	var service *wmi.Service
 	var err error

@@ -16,12 +16,13 @@ type SyntheticDiskDriveSettings struct {
 type diskAssociation interface {
 	setParent(parent string)
 	setHostResource(resource []string)
+	Path() string
 }
 
 func (d *SyntheticDiskDriveSettings) DefineVirtualHardDisk(vhdxFile string) (*VirtualHardDiskStorageSettings, error) {
 	vhd := &VirtualHardDiskStorageSettings{}
 
-	if err := createDiskResourceInternal(d.systemSettings.S__PATH, d.S__PATH, vhdxFile, vhd, VirtualHardDiskType); err != nil {
+	if err := createDiskResourceInternal(d.systemSettings.Path(), d.Path(), vhdxFile, vhd, VirtualHardDiskType); err != nil {
 		return nil, err
 	}
 

@@ -52,3 +52,8 @@ func (s *StorageAllocationSettings) setParent(parent string) {
 func (s *StorageAllocationSettings) setHostResource(resource []string) {
 	s.HostResource = resource
 }
+
+func (s *StorageAllocationSettings) Path() string {
+	return s.S__PATH
+}
+

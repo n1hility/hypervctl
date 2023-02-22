@@ -46,6 +46,10 @@ type SyntheticEthernetPortSettings struct {
 	systemSettings *SystemSettings
 }
 
+func (p *SyntheticEthernetPortSettings) Path() string {
+	return p.S__PATH
+}
+
 func (p *SyntheticEthernetPortSettings) DefineEthernetPortConnection(switchName string) (*EthernetPortAllocationSettings, error) {
 	const wqlFormat = "select * from Msvm_VirtualEthernetSwitch where %s = '%s'"
 
@@ -82,7 +86,7 @@ func (p *SyntheticEthernetPortSettings) DefineEthernetPortConnection(switchName 
 		return nil, err
 	}
 
-	connectSettings.Parent = p.S__PATH
+	connectSettings.Parent = p.Path()
 	connectSettings.HostResource = append(connectSettings.HostResource, switchPath)
 
 	resource, err := creatEthernetPortAllocationSettings(connectSettings)
@@ -90,7 +94,7 @@ func (p *SyntheticEthernetPortSettings) DefineEthernetPortConnection(switchName 
 		return nil, err
 	}
 
-	path, err := addResource(service, p.systemSettings.S__PATH, resource)
+	path, err := addResource(service, p.systemSettings.Path(), resource)
 	if err != nil {
 		return nil, err
 	}

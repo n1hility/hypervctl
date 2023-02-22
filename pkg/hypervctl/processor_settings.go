@@ -41,7 +41,6 @@ ResourceType                   : 3
 VirtualQuantity                : 2
 VirtualQuantityUnits           : count
 Weight                         : 100
-PSComputerName                 : JASONGREENEEE6B
 */
 
 type ProcessorSettings struct {

@@ -19,10 +19,17 @@ type diskAssociation interface {
 	Path() string
 }
 
-func (d *SyntheticDiskDriveSettings) DefineVirtualHardDisk(vhdxFile string) (*VirtualHardDiskStorageSettings, error) {
+func (d *SyntheticDiskDriveSettings) DefineVirtualHardDisk(vhdxFile string, beforeAdd func(*VirtualHardDiskStorageSettings)) (*VirtualHardDiskStorageSettings, error) {
 	vhd := &VirtualHardDiskStorageSettings{}
 
-	if err := createDiskResourceInternal(d.systemSettings.Path(), d.Path(), vhdxFile, vhd, VirtualHardDiskType); err != nil {
+	var cb func()
+	if beforeAdd != nil {
+		cb = func() {
+			beforeAdd(vhd)
+		}
+	}
+
+	if err := createDiskResourceInternal(d.systemSettings.Path(), d.Path(), vhdxFile, vhd, VirtualHardDiskType, cb); err != nil {
 		return nil, err
 	}
 
@@ -31,7 +38,7 @@ func (d *SyntheticDiskDriveSettings) DefineVirtualHardDisk(vhdxFile string) (*Vi
 	return vhd, nil
 }
 
-func createDiskResourceInternal(systemPath string, drivePath string, file string, settings diskAssociation, resourceType string) error {
+func createDiskResourceInternal(systemPath string, drivePath string, file string, settings diskAssociation, resourceType string, cb func()) error {
 	var service *wmi.Service
 	var err error
 	if service, err = wmi.NewLocalService(HyperVNamespace); err != nil {
@@ -45,6 +52,9 @@ func createDiskResourceInternal(systemPath string, drivePath string, file string
 
 	settings.setHostResource([]string{file})
 	settings.setParent(drivePath)
+	if cb != nil {
+		cb()
+	}
 
 	diskResource, err := createResourceSettingGeneric(settings, resourceType)
 	if err != nil {

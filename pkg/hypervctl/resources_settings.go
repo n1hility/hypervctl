@@ -79,29 +79,6 @@ func createResourceSettingGeneric(settings interface{}, resourceType string) (st
 	return wmiext.GetCimText(resource), nil
 }
 
-func fetchDefaultResourceAllocationSettings(resourceType string) (*ResourceSettings, error) {
-	settings := &ResourceSettings{}
-	return settings, populateDefaults(resourceType, settings)
-}
-
-func createResourceFromDefault(resourceType string) (string, error) {
-	resourceSettings, err := fetchDefaultResourceAllocationSettings(resourceType)
-	if err != nil {
-		return "", err
-	}
-
-	resourceStr, err := createResourceAllocationSettings(resourceSettings, resourceType)
-	if err != nil {
-		return "", err
-	}
-
-	return resourceStr, nil
-}
-
-func createResourceAllocationSettings(settings *ResourceSettings, resourceType string) (string, error) {
-	return createResourceSettingGeneric(settings, resourceType)
-}
-
 func populateDefaults(subType string, settings interface{}) error {
 	var service *wmi.Service
 	var err error

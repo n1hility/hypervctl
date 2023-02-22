@@ -1,6 +1,7 @@
 package hypervctl
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/drtimf/wmi"
@@ -66,9 +67,20 @@ func (builder *SystemSettingsBuilder) Build() (*SystemSettings, error) {
 	defer service.Close()
 
 	systemSettings := builder.systemSettings
-	if err != nil {
-		return nil, err
+	if systemSettings == nil {
+		return nil, errors.New("prepareSettings not called on builder")
 	}
+
+	processorSettings := builder.processorSettings
+	if processorSettings == nil {
+		return nil, errors.New("preparProcessorSettings not called on builder")
+	}
+
+	memorySettings := builder.memorySettings
+	if memorySettings == nil {
+		return nil, errors.New("prepareMemorySettings not called on builder")
+	}
+
 	systemSettingsInst, err := wmiext.SpawnInstance(service, "Msvm_VirtualSystemSettingData")
 	if err != nil {
 		return nil, err
@@ -80,14 +92,10 @@ func (builder *SystemSettingsBuilder) Build() (*SystemSettings, error) {
 		return nil, err
 	}
 
-	memorySettings := builder.memorySettings
-
 	memoryStr, err := createMemorySettings(memorySettings)
 	if err != nil {
 		return nil, err
 	}
-
-	processorSettings := builder.processorSettings
 
 	processorStr, err := createProcessorSettings(processorSettings)
 	if err != nil {

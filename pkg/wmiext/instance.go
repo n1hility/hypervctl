@@ -87,9 +87,18 @@ func FindFirstInstance(service *wmi.Service, wql string) (*wmi.Instance, error) 
 	if enum, err = service.ExecQuery(wql); err != nil {
 		return nil, err
 	}
-
 	defer enum.Close()
-	return enum.Next()
+
+	instance, err := enum.Next()
+	if err != nil {
+		return nil, err
+	}
+
+	if instance == nil {
+		return nil, errors.New("No results found.")
+	}
+
+	return instance, nil
 }
 
 func FindFirstRelatedInstance(service *wmi.Service, objPath string, className string) (*wmi.Instance, error) {

@@ -11,7 +11,7 @@ type SyntheticDvdDriveSettings struct {
 func (d *SyntheticDvdDriveSettings) DefineVirtualDvdDisk(imageFile string) (*VirtualDvdDiskStorageSettings, error) {
 	vdvd := &VirtualDvdDiskStorageSettings{}
 
-	if err := createDiskResourceInternal(d.systemSettings.Path(), d.Path(), imageFile, vdvd, VirtualDvdDiskType); err != nil {
+	if err := createDiskResourceInternal(d.systemSettings.Path(), d.Path(), imageFile, vdvd, VirtualDvdDiskType, nil); err != nil {
 		return nil, err
 	}
 

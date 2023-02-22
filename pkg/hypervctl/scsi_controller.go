@@ -48,7 +48,8 @@ func (c *ScsiControllerSettings) createSyntheticDriveInternal(slot uint, setting
 	if err = populateDefaults(resourceType, settings); err != nil {
 		return err
 	}
-	settings.setParent(c.S__PATH)
+
+	settings.setParent(c.Path())
 	settings.setAddressOnParent(fmt.Sprintf("%d", slot))
 
 	driveResource, err := createResourceSettingGeneric(settings, resourceType)

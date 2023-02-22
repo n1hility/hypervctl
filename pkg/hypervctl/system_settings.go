@@ -93,7 +93,7 @@ func (systemSettings *SystemSettings) AddScsiController() (*ScsiControllerSettin
 	const scsiControllerType = "Microsoft:Hyper-V:Synthetic SCSI Controller"
 	controller := &ScsiControllerSettings{}
 
-	if err := systemSettings.createSystemResourceInternal(controller, scsiControllerType); err != nil {
+	if err := systemSettings.createSystemResourceInternal(controller, scsiControllerType, nil); err != nil {
 		return nil, err
 	}
 
@@ -101,7 +101,7 @@ func (systemSettings *SystemSettings) AddScsiController() (*ScsiControllerSettin
 	return controller, nil
 }
 
-func (systemSettings *SystemSettings) createSystemResourceInternal(settings interface{}, resourceType string) error {
+func (systemSettings *SystemSettings) createSystemResourceInternal(settings interface{}, resourceType string, cb func()) error {
 	var service *wmi.Service
 	var err error
 	if service, err = wmi.NewLocalService(HyperVNamespace); err != nil {
@@ -109,10 +109,18 @@ func (systemSettings *SystemSettings) createSystemResourceInternal(settings inte
 	}
 	defer service.Close()
 
-	resourceStr, err := createResourceFromDefault(resourceType)
-	if err != nil {
+	if err = populateDefaults(resourceType, settings); err != nil {
 		return err
 	}
+
+	if cb != nil {
+		cb()
+	}
+
+	resourceStr, err := createResourceSettingGeneric(settings, resourceType)
+	if err != nil {
+		return err
+	}	
 
 	path, err := addResource(service, systemSettings.Path(), resourceStr)
 	if err != nil {
@@ -123,10 +131,18 @@ func (systemSettings *SystemSettings) createSystemResourceInternal(settings inte
 	return err
 }
 
-func (systemSettings *SystemSettings) AddSyntheticEthernetPort() (*SyntheticEthernetPortSettings, error) {
+func (systemSettings *SystemSettings) AddSyntheticEthernetPort(beforeAdd func(*SyntheticEthernetPortSettings)) (*SyntheticEthernetPortSettings, error) {
 	const networkAdapterType = SyntheticEthernetPortResourceType
 	port := &SyntheticEthernetPortSettings{}
-	if err := systemSettings.createSystemResourceInternal(port, networkAdapterType); err != nil {
+
+	var cb func()
+	if beforeAdd != nil {
+		cb = func() {
+			beforeAdd(port)
+		}
+	}
+
+	if err := systemSettings.createSystemResourceInternal(port, networkAdapterType, cb); err != nil {
 		return nil, err
 	}
 
